@@ -1,18 +1,3 @@
-/***************************************************
-  This is an example for the Adafruit Thermocouple Sensor w/MAX31855K
-
-  Designed specifically to work with the Adafruit Thermocouple Sensor
-  ----> https://www.adafruit.com/products/269
-
-  These displays use SPI to communicate, 3 pins are required to
-  interface
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.
-  BSD license, all text above must be included in any redistribution
- ****************************************************/
 
 #include <SPI.h>
 #include "Adafruit_MAX31855.h"
@@ -22,22 +7,23 @@
 
 // Example creating a thermocouple instance with software SPI on any three
 // digital IO pins.
-#define MAXDO   3
-#define MAXCS   5
-#define MAXCLK  6
+#define MAXCS  6
+#define MAXCLK 7
+#define MAXDO1 8
+#define MAXDO2 9
+#define MAXDO3 10
+#define MAXDO4 11
 
 // initialize the Thermocouple
-Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple1(MAXCLK, MAXCS, MAXDO1);
+Adafruit_MAX31855 thermocouple2(MAXCLK, MAXCS, MAXDO2);
+Adafruit_MAX31855 thermocouple3(MAXCLK, MAXCS, MAXDO3);
+Adafruit_MAX31855 thermocouple4(MAXCLK, MAXCS, MAXDO4);
 
-// Example creating a thermocouple instance with hardware SPI
-// on a given CS pin.
-//#define MAXCS   10
-//Adafruit_MAX31855 thermocouple(MAXCS);
-
-// Example creating a thermocouple instance with hardware SPI
-// on SPI1 using specified CS pin.
-//#define MAXCS   10
-//Adafruit_MAX31855 thermocouple(MAXCS, SPI1);
+double tc1_avg = 0.0;
+double tc2_avg = 0.0;
+double tc3_avg = 0.0;
+double tc4_avg = 0.0;
 
 void setup() {
   Serial.begin(9600);
@@ -47,37 +33,31 @@ void setup() {
   Serial.println("MAX31855 test");
   // wait for MAX chip to stabilize
   delay(500);
-  Serial.print("Initializing sensor...");
-  if (!thermocouple.begin()) {
+  Serial.print("Initializing sensors...");
+  if (!thermocouple1.begin() || !thermocouple2.begin() || !thermocouple3.begin() || !thermocouple4.begin()) {
     Serial.println("ERROR.");
     while (1) delay(10);
   }
-
-  // OPTIONAL: Can configure fault checks as desired (default is ALL)
-  // Multiple checks can be logically OR'd together.
-  // thermocouple.setFaultChecks(MAX31855_FAULT_OPEN | MAX31855_FAULT_SHORT_VCC);  // short to GND fault is ignored
 
   Serial.println("DONE.");
 }
 
 void loop() {
-  // basic readout test, just print the current temp
-   Serial.print("Internal Temp = ");
-   Serial.println(thermocouple.readInternal());
+  // read data and average past 50 samples; 100 Hz sample rate
+   double tc1 = thermocouple1.readInternal();
+   double tc2 = thermocouple2.readInternal();
+   double tc3 = thermocouple3.readInternal();
+   double tc4 = thermocouple4.readInternal();
 
-   double c = thermocouple.readCelsius();
-   if (isnan(c)) {
-     Serial.println("Thermocouple fault(s) detected!");
-     uint8_t e = thermocouple.readError();
-     if (e & MAX31855_FAULT_OPEN) Serial.println("FAULT: Thermocouple is open - no connections.");
-     if (e & MAX31855_FAULT_SHORT_GND) Serial.println("FAULT: Thermocouple is short-circuited to GND.");
-     if (e & MAX31855_FAULT_SHORT_VCC) Serial.println("FAULT: Thermocouple is short-circuited to VCC.");
-   } else {
-     Serial.print("C = ");
-     Serial.println(c);
-   }
-   //Serial.print("F = ");
-   //Serial.println(thermocouple.readFahrenheit());
+   // send data once per second
+   Serial.print("Temps:");
+   Serial.print(tc1);
+   Serial.print(";");
+   Serial.print(tc2);
+   Serial.print(";");
+   Serial.print(tc3);
+   Serial.print(";");
+   Serial.println(tc4);
 
-   delay(1000);
+   delay(50);
 }
