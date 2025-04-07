@@ -53,10 +53,10 @@ void setup() {
 
 void loop() {
   // read data and average past 50 samples; 100 Hz sample rate
-   double tc1 = thermocouple1.readCelsius();
-   double tc2 = thermocouple2.readCelsius();
-   double tc3 = thermocouple3.readCelsius();
-   double tc4 = thermocouple4.readCelsius();
+   double tc1 = thermocouple1.readInternal();
+   double tc2 = thermocouple2.readInternal();
+   double tc3 = thermocouple3.readInternal();
+   double tc4 = thermocouple4.readInternal();
 
    tc1_readings[index] = tc1;
    tc2_readings[index] = tc2;
