@@ -20,6 +20,15 @@ Adafruit_MAX31855 thermocouple2(MAXCLK, MAXCS, MAXDO2);
 Adafruit_MAX31855 thermocouple3(MAXCLK, MAXCS, MAXDO3);
 Adafruit_MAX31855 thermocouple4(MAXCLK, MAXCS, MAXDO4);
 
+const int num_samples = 10;
+double tc1_readings[num_samples];
+double tc2_readings[num_samples];
+double tc3_readings[num_samples];
+double tc4_readings[num_samples];
+
+int index = 0;
+int count = 0;
+
 double tc1_avg = 0.0;
 double tc2_avg = 0.0;
 double tc3_avg = 0.0;
@@ -49,14 +58,6 @@ void loop() {
    double tc3 = thermocouple3.readCelsius();
    double tc4 = thermocouple4.readCelsius();
 
-   const int num_samples = 10;
-   double tc1_readings[num_samples];
-   double tc2_readings[num_samples];
-   double tc3_readings[num_samples];
-   double tc4_readings[num_samples];
-   int index = 0;
-   int count = 0;
-
    tc1_readings[index] = tc1;
    tc2_readings[index] = tc2;
    tc3_readings[index] = tc3;
@@ -64,17 +65,25 @@ void loop() {
 
    index = (index + 1) % num_samples;
 
-     if (currentSampleCount < numSamples) {
-    currentSampleCount++;
+     if (count < num_samples) {
+    count = count + 1;
   }
 
-   double avg1 = average(tc1_readings, count);
-   double avg2 = average(tc2_readings, count);
-   double avg3 = average(tc3_readings, count);
-   double avg4 = average(tc4_readings, count);
+  double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+  for (int i = 0; i < count; i = i + 1) {
+    sum1 = sum1 + tc1_readings[i];
+    sum2 = sum2 + tc2_readings[i];
+    sum3 = sum3 + tc3_readings[i];
+    sum4 = sum4 + tc4_readings[i];
+  }
+
+  tc1_avg = sum1 / count;
+  tc2_avg = sum2 / count;
+  tc3_avg = sum3 / count;
+  tc4_avg = sum4 / count;
+   
 
    // send data once per second
-   Serial.print("Temps:");
    Serial.print(tc1_avg);
    Serial.print(";");
    Serial.print(tc2_avg);
@@ -84,5 +93,5 @@ void loop() {
    Serial.println(tc4_avg);
    
 
-   delay(100);
+   delay(1000);
 }
