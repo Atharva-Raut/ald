@@ -7,18 +7,17 @@
 
 // Example creating a thermocouple instance with software SPI on any three
 // digital IO pins.
-#define MAXCS  6
-#define MAXCLK 7
-#define MAXDO1 8
-#define MAXDO2 9
-#define MAXDO3 10
-#define MAXDO4 11
+
+#define CS1 6
+#define CS2 5
+#define CS3 4
+#define CS4 3
 
 // initialize the Thermocouple
-Adafruit_MAX31855 thermocouple1(MAXCLK, MAXCS, MAXDO1);
-Adafruit_MAX31855 thermocouple2(MAXCLK, MAXCS, MAXDO2);
-Adafruit_MAX31855 thermocouple3(MAXCLK, MAXCS, MAXDO3);
-Adafruit_MAX31855 thermocouple4(MAXCLK, MAXCS, MAXDO4);
+Adafruit_MAX31855 temp1(13, CS1, 12);  // SCK, CS, MISO
+Adafruit_MAX31855 temp2(13, CS2, 12);
+Adafruit_MAX31855 temp3(13, CS3, 12);
+Adafruit_MAX31855 temp4(13, CS4, 12);
 
 const int num_samples = 10;
 double tc1_readings[num_samples];
@@ -43,7 +42,7 @@ void setup() {
   // wait for MAX chip to stabilize
   delay(500);
   Serial.print("Initializing sensors...");
-  if (!thermocouple1.begin() || !thermocouple2.begin() || !thermocouple3.begin() || !thermocouple4.begin()) {
+  if (!temp1.begin() || !temp2.begin() || !temp3.begin() || !temp4.begin()) {
     Serial.println("ERROR.");
     while (1) delay(10);
   }
@@ -53,10 +52,10 @@ void setup() {
 
 void loop() {
   // read data and average past 50 samples; 100 Hz sample rate
-   double tc1 = thermocouple1.readInternal();
-   double tc2 = thermocouple2.readInternal();
-   double tc3 = thermocouple3.readInternal();
-   double tc4 = thermocouple4.readInternal();
+   double tc1 = temp1.readCelsius();
+   double tc2 = temp2.readCelsius();
+   double tc3 = temp3.readCelsius();
+   double tc4 = temp4.readCelsius();
 
    tc1_readings[index] = tc1;
    tc2_readings[index] = tc2;
@@ -90,7 +89,8 @@ void loop() {
    Serial.print(";");
    Serial.print(tc3_avg);
    Serial.print(";");
-   Serial.println(tc4_avg);
+   Serial.print(tc4_avg);
+   Serial.println(";");
    
 
    delay(1000);
