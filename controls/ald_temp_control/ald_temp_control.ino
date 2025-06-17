@@ -1,6 +1,6 @@
 // substrate heater control loop - bangbang controls
 
-#include <MAX31855.h>
+#include <Adafruit_MAX31855.h>
 
 int32_t rawData = 0;
 
@@ -20,7 +20,8 @@ double tc4_avg = 0.0;
 
 double current_reading[4];
 
-MAX31855_Class thermocouples[4];
+// pins 3,4,5,6
+Adafruit_MAX31855 thermocouples[4] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4), Adafruit_MAX31855(5), Adafruit_MAX31855(6)};
 
 #define TEMP_SETPOINT 225.0
 #define RELAY1_PIN A0
@@ -29,8 +30,8 @@ void setup()
 {
 	Serial.begin(9600);
 
-	for (int i=3;i<7;i++)
-		thermocouples[i-3].begin(i); // pins 3,4,5,6
+	for (int i=0;i<4;i++)
+		thermocouples[i].begin(); // pins 3,4,5,6
 
   pinMode(RELAY1_PIN, OUTPUT);
   
@@ -44,7 +45,7 @@ void setup()
 double readThermocouples()
 {
 	for (int i=0; i<4; ++i)
-		current_reading[i] = thermocouples[i].readProbe() / 1000;
+		current_reading[i] = thermocouples[i].readCelsius();
 	
 	tc1_readings[index] = current_reading[0];
 	tc2_readings[index] = current_reading[1];
@@ -80,19 +81,6 @@ double readThermocouples()
 
 void loop()
 {
-	// read incoming serial data:
-  // char inChar = Serial.read();
-
-  // static int tc1_count = 0;
-  // tc1_count++;
-  // if (count %)
-  // if (count % 2)
-  //   digitalWrite(RELAY1_PIN, HIGH);
-  // else
-  //   digitalWrite(RELAY1_PIN, LOW);
-  // delay(500);
-
-  // if (inChar == 't')
   double tc_reading = readThermocouples();
   
   if (tc_reading < TEMP_SETPOINT)
