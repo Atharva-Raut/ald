@@ -36,16 +36,25 @@ Adafruit_MAX31855 thermocouples[8] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4)
 
 // set temperature setpoints for heating elements
 #define TEMP_SETPOINT1 150.0
-#define TEMP_SETPOINT2 150.0
-#define TEMP_SETPOINT3 150.0
+#define TEMP_SETPOINT2 30.0
+#define TEMP_SETPOINT3 30.0
 #define TEMP_SETPOINT4 150.0
 
 // relay pins to control relays for heating elements
-#define RELAY1_PIN A0
+#define RELAY1_PIN 2
+#define RELAY2_PIN A0
+#define RELAY3_PIN A1
+#define RELAY4_PIN A2
 
 void setup()
 {
 	Serial.begin(9600);
+
+	// relay pins
+	pinMode(RELAY1_PIN, OUTPUT);
+	pinMode(RELAY2_PIN, OUTPUT);
+	pinMode(RELAY3_PIN, OUTPUT);
+	pinMode(RELAY4_PIN, OUTPUT);
 
 	// K-type: pins 3,4,5,6
 	// J-type: pins 7,8,9,10
@@ -109,8 +118,24 @@ void loop()
 	// thermocouple control loop
   readThermocouples();
   
-  if (tc1_avg > TEMP_SETPOINT1)
+	// select whichever thermocouple/relay pairs you want to actuate
+  if (tc2_avg > TEMP_SETPOINT1)
     digitalWrite(RELAY1_PIN, HIGH);
   else
     digitalWrite(RELAY1_PIN, LOW);
+
+	if (tc3_avg > TEMP_SETPOINT2)
+    digitalWrite(RELAY2_PIN, HIGH);
+  else
+    digitalWrite(RELAY2_PIN, LOW);
+
+	if (tc4_avg > TEMP_SETPOINT3)
+    digitalWrite(RELAY3_PIN, HIGH);
+  else
+    digitalWrite(RELAY3_PIN, LOW);
+
+	if (tc5_avg > TEMP_SETPOINT4)
+    digitalWrite(RELAY4_PIN, HIGH);
+  else
+    digitalWrite(RELAY4_PIN, LOW);
 }
