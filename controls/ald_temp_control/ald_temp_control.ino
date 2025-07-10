@@ -1,4 +1,7 @@
-// substrate heater control loop - bangbang controls
+// ald_temp_control.ino
+// This file reads thermocouple values and uses them to actuate relays connected to heating elements in order to maintain them at a predetermined setpoint using bang-bang controls.
+// CMU Hacker Fab 2025
+// Joel Gonzalez, Haewon Uhm
 
 #include <Adafruit_MAX31855.h>
 
