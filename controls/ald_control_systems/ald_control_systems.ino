@@ -92,22 +92,22 @@ void setup()
   if (DO_NOTHING)
     while(1);
 
-	Serial.begin(9600);
+  Serial.begin(9600);
 
-	// relay pins
-	pinMode(RELAY1_PIN, OUTPUT);
-	pinMode(RELAY2_PIN, OUTPUT);
-	pinMode(RELAY3_PIN, OUTPUT);
-	pinMode(RELAY4_PIN, OUTPUT);
+  // relay pins
+  pinMode(RELAY1_PIN, OUTPUT);
+  pinMode(RELAY2_PIN, OUTPUT);
+  pinMode(RELAY3_PIN, OUTPUT);
+  pinMode(RELAY4_PIN, OUTPUT);
   pinMode(RELAY6_PIN, OUTPUT);
   pinMode(RELAY7_PIN, OUTPUT);
   pinMode(RELAY8_PIN, OUTPUT);
 
-	// K-type: pins 3,4,5,6
-	// J-type: pins 7,8,9,10
-	for (int i=0;i<7;i++)
-		thermocouples[i].begin();
-  
+  // K-type: pins 3,4,5,6
+  // J-type: pins 7,8,9,10
+  for (int i=0;i<7;i++)
+    thermocouples[i].begin();
+
   Serial.begin(9600);
   while (!Serial)
     Serial.println("waiting");
