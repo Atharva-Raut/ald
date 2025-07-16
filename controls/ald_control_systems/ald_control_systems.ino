@@ -168,17 +168,17 @@ void actuateHeatingElements()
   else
     digitalWrite(RELAY1_PIN, LOW);
 
-	if (tc3_avg > temp_sp2)
+  if (tc3_avg > temp_sp2)
     digitalWrite(RELAY2_PIN, HIGH);
   else
     digitalWrite(RELAY2_PIN, LOW);
 
-	if (tc4_avg > temp_sp3)
+  if (tc4_avg > temp_sp3)
     digitalWrite(RELAY3_PIN, HIGH);
   else
     digitalWrite(RELAY3_PIN, LOW);
 
-	if (tc5_avg > temp_sp4)
+  if (tc5_avg > temp_sp4)
     digitalWrite(RELAY4_PIN, HIGH);
   else
     digitalWrite(RELAY4_PIN, LOW);
