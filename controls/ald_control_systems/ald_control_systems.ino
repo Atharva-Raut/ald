@@ -118,46 +118,46 @@ void setup()
 // takes moving average of thermocouple data
 double readThermocouples()
 {	
-	for (int i=0; i<7; ++i)
-		current_reading[i] = thermocouples[i].readCelsius();
-	
-	tc1_readings[index] = current_reading[0];
-	tc2_readings[index] = current_reading[1];
-	tc3_readings[index] = current_reading[2];
-	tc4_readings[index] = current_reading[3];
-	tc5_readings[index] = current_reading[4];
-	tc6_readings[index] = current_reading[5];
-	tc7_readings[index] = current_reading[6];
-	tc8_readings[index] = current_reading[7];
-		
-	index = (index + 1) % num_samples;
-	
-	if (count < num_samples)
-		count = count + 1;
-	
-	double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0, sum5 = 0, sum6 = 0, sum7 = 0, sum8 = 0;
-	for (int i = 0; i<count; i= i+1)
-	{
-		sum1 += tc1_readings[i];
-		sum2 += tc2_readings[i];
-		sum3 += tc3_readings[i];
-		sum4 += tc4_readings[i];
-		sum5 += tc5_readings[i];
-		sum6 += tc6_readings[i];
-		sum7 += tc7_readings[i];
-		sum8 += tc8_readings[i];
-	}
-	
-	tc1_avg = sum1 / count;
-	tc2_avg = sum2 / count;
-	tc3_avg = sum3 / count;
-	tc4_avg = sum4 / count;
-	tc5_avg = sum5 / count;
-	tc6_avg = sum6 / count;
-	tc7_avg = sum7 / count;
-	tc8_avg = sum8 / count;
-	
-	Serial.println(String(tc1_avg) + "; " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg) + ";" + String(tc6_avg) + ";" + String(tc7_avg) + ";" + String(tc8_avg) + ";");
+  for (int i=0; i<7; ++i)
+    current_reading[i] = thermocouples[i].readCelsius();
+
+  tc1_readings[index] = current_reading[0];
+  tc2_readings[index] = current_reading[1];
+  tc3_readings[index] = current_reading[2];
+  tc4_readings[index] = current_reading[3];
+  tc5_readings[index] = current_reading[4];
+  tc6_readings[index] = current_reading[5];
+  tc7_readings[index] = current_reading[6];
+  tc8_readings[index] = current_reading[7];
+    
+  index = (index + 1) % num_samples;
+
+  if (count < num_samples)
+    count = count + 1;
+
+  double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0, sum5 = 0, sum6 = 0, sum7 = 0, sum8 = 0;
+  for (int i = 0; i<count; i= i+1)
+  {
+    sum1 += tc1_readings[i];
+    sum2 += tc2_readings[i];
+    sum3 += tc3_readings[i];
+    sum4 += tc4_readings[i];
+    sum5 += tc5_readings[i];
+    sum6 += tc6_readings[i];
+    sum7 += tc7_readings[i];
+    sum8 += tc8_readings[i];
+  }
+
+  tc1_avg = sum1 / count;
+  tc2_avg = sum2 / count;
+  tc3_avg = sum3 / count;
+  tc4_avg = sum4 / count;
+  tc5_avg = sum5 / count;
+  tc6_avg = sum6 / count;
+  tc7_avg = sum7 / count;
+  tc8_avg = sum8 / count;
+
+  // Serial.println(String(tc1_avg) + "; " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg) + ";" + String(tc6_avg) + ";" + String(tc7_avg) + ";" + String(tc8_avg) + ";");
 }
 
 void actuateHeatingElements()
