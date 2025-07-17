@@ -8,7 +8,7 @@
 // Duration of pulses for each valve (milliseconds)
 // Temperature set points for each heating element (celsius)
 // An example command looks like the following:
-// 8,500.0,12,200.0,4,1200.0,300.0,180.0,120.0,250.0
+// 8,500,12,200,4,1200,300,180,120,250
 // This would mean:
 // Eight 500ms pulses for ALD valve 1.
 // Twelve 200ms pulses for ALD valve 2.
@@ -25,11 +25,18 @@
 // toggle this if you want the system to do nothing
 #define DO_NOTHING 0
 // relay pins to control relays for heating elements
+// relay 1 -> substrate heater
+// relay 2 -> delivery line tape
+// relay 3 -> precursor 1
+// relay 4 -> precursor 2
 #define RELAY1_PIN 2
 #define RELAY2_PIN A0
 #define RELAY3_PIN A1
 #define RELAY4_PIN A2
 // relay pins to control relays for ALD valves
+// relay 6 -> valve 1
+// relay 7 -> valve 2
+// relay 8 -> valve 3
 #define RELAY6_PIN A3
 #define RELAY7_PIN A4
 #define RELAY8_PIN A5
@@ -66,15 +73,17 @@ double current_reading[8];
 Adafruit_MAX31855 thermocouples[8] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4), Adafruit_MAX31855(5), Adafruit_MAX31855(6), Adafruit_MAX31855(7), Adafruit_MAX31855(8), Adafruit_MAX31855(9), Adafruit_MAX31855(10)};
 
 // set temperature setpoints for heating elements
-int temp_sp1 = 0.0;
-unsigned int sp1_reached = 0;
-int temp_sp2 = 0.0;
+int temp_sp2 = 0.0; // 
 unsigned int sp2_reached = 0;
 int temp_sp3 = 0.0;
 unsigned int sp3_reached = 0;
-int temp_sp4 = 0.0;
+int temp_sp4 = 0.0; // 
 unsigned int sp4_reached = 0;
-unsigned int all_sp_reached = 0;
+int temp_sp5 = 0.0; // substrate heater
+unsigned int sp5_reached = 0;
+
+unsigned int current_valve = 1;
+unsigned int valve_actuation_started = 0;
 
 unsigned int num_pulse1 = 0;
 unsigned long previousMillis_1 = 0;
@@ -90,6 +99,8 @@ unsigned int num_pulse3 = 0;
 unsigned long previousMillis_3 = 0;
 unsigned long pulse_time3 = 0; // Interval for toggling the pin (in milliseconds)
 bool outputState_3 = LOW;
+
+unsigned int purge_time = 0; // milliseconds
 
 unsigned int JOB_IN_PROGRESS = 0;
 
@@ -116,9 +127,9 @@ void setup()
 
   Serial.begin(9600);
   while (!Serial)
-    Serial.println("waiting");
+    Serial.println("Waiting for serial...");
 
-  Serial.println("ready");
+  Serial.println("Setup complete!");
 }
 
 // takes moving average of thermocouple data
@@ -173,45 +184,54 @@ void readThermocouples()
 void actuateHeatingElements()
 {
   // select whichever thermocouple/relay pairs you want to actuate
-  if (tc2_avg > temp_sp1)
-  {
-    digitalWrite(RELAY1_PIN, HIGH);
-    sp1_reached = 1; // hit the setpoint
-  }
-  else
-  {
-    digitalWrite(RELAY1_PIN, LOW);
-    sp2_reached = 1; // hit the setpoint
-  }
-
-  if (tc3_avg > temp_sp2)
+  if (tc2_avg > temp_sp2)
   {
     digitalWrite(RELAY2_PIN, HIGH);
-    sp3_reached = 1; // hit the setpoint
+    sp2_reached = 1; // hit the setpoint
   }
   else
   {
     digitalWrite(RELAY2_PIN, LOW);
   }
 
-  if (tc4_avg > temp_sp3)
+  if (tc3_avg > temp_sp3)
   {
     digitalWrite(RELAY3_PIN, HIGH);
-    sp4_reached = 1; // hit the setpoint
+    sp3_reached = 1; // hit the setpoint
   }
   else
   {
     digitalWrite(RELAY3_PIN, LOW);
   }
 
-  if (tc5_avg > temp_sp4)
+  if (tc4_avg > temp_sp4)
   {
     digitalWrite(RELAY4_PIN, HIGH);
+    sp4_reached = 1; // hit the setpoint
   }
   else
   {
     digitalWrite(RELAY4_PIN, LOW);
   }
+
+  if (tc5_avg > temp_sp5)
+  {
+    digitalWrite(RELAY1_PIN, HIGH);
+    sp5_reached = 1; // hit the setpoint
+  }
+  else
+  {
+    digitalWrite(RELAY1_PIN, LOW);
+  }
+}
+
+// close ALD valves to allow for system purge using carrier gas
+void purgeSystem()
+{
+  digitalWrite(RELAY6_PIN, LOW);
+  digitalWrite(RELAY7_PIN, LOW);
+  digitalWrite(RELAY8_PIN, LOW);
+  delay(purge_time);
 }
 
 void precursorValveActuation()
@@ -220,95 +240,90 @@ void precursorValveActuation()
   unsigned long currentMillis = millis();
 
   // valve 1
-  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0)) {
+  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1)) {
     // Save the last time you toggled the pin
     previousMillis_1 = currentMillis;
 
-    // If the output is currently LOW, make it HIGH
-    // and vice-versa
-    if (outputState_1 == LOW) {
-      outputState_1 = HIGH;
-    } else {
-      outputState_1 = LOW;
-      num_pulse1--;
-    }
-
-    // Set the output pin to the new state
+    // Toggle output pin and set the output pin to the new state
+    outputState_1 = !outputState_1;
     digitalWrite(RELAY6_PIN, outputState_1);
+
+    // we just closed the valve
+    if (outputState_1 == HIGH)
+    {
+      num_pulse1--;
+      current_valve = 2; // move to next valve
+    }
   }
 
   // valve 2
-  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0)) {
+  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2)) {
     // Save the last time you toggled the pin
     previousMillis_2 = currentMillis;
 
-    // If the output is currently LOW, make it HIGH
-    // and vice-versa
-    if (outputState_2 == LOW) {
-      outputState_2 = HIGH;
-    } else {
-      outputState_2 = LOW;
-      num_pulse2--;
-    }
-
-    // Set the output pin to the new state
+    // Toggle output pin and set the output pin to the new state
+    outputState_2 = !outputState_2;
     digitalWrite(RELAY7_PIN, outputState_2);
+
+    // we just closed the valve
+    if (outputState_2 == HIGH)
+    {
+      num_pulse2--;
+      current_valve = 3; // move to next valve
+    }
   }
 
   // valve 3
-  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0)) {
+  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3)) {
     // Save the last time you toggled the pin
     previousMillis_3 = currentMillis;
 
-    // If the output is currently LOW, make it HIGH
-    // and vice-versa
-    if (outputState_3 == LOW) {
-      outputState_3 = HIGH;
-    } else {
-      outputState_3 = LOW;
-      num_pulse3--;
-    }
-
-    // Set the output pin to the new state
+    // Toggle output pin and set the output pin to the new state
+    outputState_3 = !outputState_3;
     digitalWrite(RELAY8_PIN, outputState_3);
+
+    // we just closed the valve
+    if (outputState_3 == HIGH)
+    {
+      num_pulse3--;
+      current_valve = 1; // move to next valve
+    }
   }
 }
 
 void loop()
 {
-  // check if all ALD pulses have finished
-  if (JOB_IN_PROGRESS && (num_pulse1 == 0) && (num_pulse2 == 0) && (num_pulse3 == 0))
+  if (!JOB_IN_PROGRESS)
   {
-    JOB_IN_PROGRESS = 0;
-    Serial.println("Job is done!");
-    while(1);
-  }
-
-  // job parsing code
-  if ((Serial.available() > 0) && (!JOB_IN_PROGRESS))
-  {
-    Serial.println("Got job!");
-    char s[100] = {0};
-    String inputString = Serial.readStringUntil('\n'); // Read until newline character
-    strcpy(s, inputString.c_str());
+    purgeSystem();
     
-    // s = "8,500,12,200,4,1200,300,180,120,250"; // example job
-
-    Serial.println(s);
-    int result = sscanf(s, "%u,%lu,%u,%lu,%u,%lu,%d,%d,%d,%d", &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp1, &temp_sp2, &temp_sp3, &temp_sp4);
-
-    // unable to parse command-line input properly
-    if (result != 10)
+    // job parsing code
+    if ((Serial.available() > 0))
     {
-      Serial.println("BAD JOB! sscanf result: ");
-      Serial.println(result);
-      return;
-    } else {
-      Serial.println("Starting job!");
-      JOB_IN_PROGRESS = 1;
+      Serial.println("Got job!");
+      char s[100] = {0};
+      String inputString = Serial.readStringUntil('\n'); // Read until newline character
+      strcpy(s, inputString.c_str());
+      
+      // s = "3000,8,500,12,200,4,1200,300,180,120,250"; // example job
+
+      Serial.println(s);
+      int result = sscanf(s, "%u,%u,%lu,%u,%lu,%u,%lu,%d,%d,%d,%d", &purge_time, &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp2, &temp_sp3, &temp_sp4, &temp_sp5);
+
+      // unable to parse command-line input properly
+      if (result != 11)
+      {
+        Serial.println("BAD JOB! sscanf result: ");
+        Serial.println(result);
+        return;
+      } else {
+        Serial.println("Starting job!");
+        JOB_IN_PROGRESS = 1;
+      }
     }
   }
 
+  // run job
   if (JOB_IN_PROGRESS)
   {
     // heating control loop
@@ -316,7 +331,25 @@ void loop()
     actuateHeatingElements();
 
     // ALD valve control once temperature targets are hit
-    if (all_sp_reached)
+    // if (sp2_reached && sp3_reached && sp4_reached && sp5_reached)
+    if (1)
+    {
+      if (!valve_actuation_started)
+      {
+        Serial.println("Enter anything to begin ALD valve actuation...");
+        while(Serial.available() == 0);
+        valve_actuation_started = 1;
+      }
+
       precursorValveActuation();
+    }
+
+    // check if all ALD pulses have finished
+    if ((num_pulse1 == 0) && (num_pulse2 == 0) && (num_pulse3 == 0))
+    {
+      JOB_IN_PROGRESS = 0;
+      Serial.println("Job is done!");
+      while(1);
+    }
   }
 }
