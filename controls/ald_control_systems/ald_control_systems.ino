@@ -8,8 +8,9 @@
 // Duration of pulses for each valve (milliseconds)
 // Temperature set points for each heating element (celsius)
 // An example command looks like the following:
-// 8,500,12,200,4,1200,300,180,120,250
+// 3000,8,500,12,200,4,1200,300,180,120,250
 // This would mean:
+// Purge time of 3000ms.
 // Eight 500ms pulses for ALD valve 1.
 // Twelve 200ms pulses for ALD valve 2.
 // Four 1200ms pulses for ALD valve 3.
