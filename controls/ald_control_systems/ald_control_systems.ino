@@ -13,8 +13,9 @@
 // Eight 500ms pulses for ALD valve 1.
 // Twelve 200ms pulses for ALD valve 2.
 // Four 1200ms pulses for ALD valve 3.
-// (IMPORTANT! The pulses will continue one after another,
-// so we will see valve 1 -> valve 2 -> valve 3 with purging in between each.)
+// IMPORTANT! The pulses will continue one after another,
+// so we will see valve 1 -> valve 2 -> valve 3 with purging time in between each.
+// The valves will remain CLOSED during the purging time to allow carrier gas to purge the lines.
 // Then, thermocouple 1 is set at 300.0C. TC2 at 180.0C. TC3 at 120.0C. And TC4 at 250.0C.
 // Note that a job must have data for every field.
 
@@ -22,7 +23,7 @@
 // Joel Gonzalez, Haewon Uhm
 
 // toggle this if you want the system to do nothing
-#define DO_NOTHING 1
+#define DO_NOTHING 0
 // relay pins to control relays for heating elements
 #define RELAY1_PIN 2
 #define RELAY2_PIN A0
@@ -65,24 +66,29 @@ double current_reading[8];
 Adafruit_MAX31855 thermocouples[8] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4), Adafruit_MAX31855(5), Adafruit_MAX31855(6), Adafruit_MAX31855(7), Adafruit_MAX31855(8), Adafruit_MAX31855(9), Adafruit_MAX31855(10)};
 
 // set temperature setpoints for heating elements
-float temp_sp1 = 0.0;
-float temp_sp2 = 0.0;
-float temp_sp3 = 0.0;
-float temp_sp4 = 0.0;
+int temp_sp1 = 0.0;
+unsigned int sp1_reached = 0;
+int temp_sp2 = 0.0;
+unsigned int sp2_reached = 0;
+int temp_sp3 = 0.0;
+unsigned int sp3_reached = 0;
+int temp_sp4 = 0.0;
+unsigned int sp4_reached = 0;
+unsigned int all_sp_reached = 0;
 
-int num_pulse1 = 0;
+unsigned int num_pulse1 = 0;
 unsigned long previousMillis_1 = 0;
-long pulse_time1 = 0; // Interval for toggling the pin (in milliseconds)
+unsigned long pulse_time1 = 0; // Interval for toggling the pin (in milliseconds)
 bool outputState_1 = LOW;
 
-int num_pulse2 = 0;
+unsigned int num_pulse2 = 0;
 unsigned long previousMillis_2 = 0;
-long pulse_time2 = 0; // Interval for toggling the pin (in milliseconds)
+unsigned long pulse_time2 = 0; // Interval for toggling the pin (in milliseconds)
 bool outputState_2 = LOW;
 
-int num_pulse3 = 0;
+unsigned int num_pulse3 = 0;
 unsigned long previousMillis_3 = 0;
-long pulse_time3 = 0; // Interval for toggling the pin (in milliseconds)
+unsigned long pulse_time3 = 0; // Interval for toggling the pin (in milliseconds)
 bool outputState_3 = LOW;
 
 unsigned int JOB_IN_PROGRESS = 0;
@@ -116,10 +122,14 @@ void setup()
 }
 
 // takes moving average of thermocouple data
-double readThermocouples()
+void readThermocouples()
 {	
   for (int i=0; i<7; ++i)
-    current_reading[i] = thermocouples[i].readCelsius();
+  {
+    double curr_val = thermocouples[i].readCelsius();
+    if (!isnan(curr_val)) // check for faulty NaN readings
+      current_reading[i] = thermocouples[i].readCelsius();
+  }
 
   tc1_readings[index] = current_reading[0];
   tc2_readings[index] = current_reading[1];
@@ -157,31 +167,51 @@ double readThermocouples()
   tc7_avg = sum7 / count;
   tc8_avg = sum8 / count;
 
-  // Serial.println(String(tc1_avg) + "; " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg) + ";" + String(tc6_avg) + ";" + String(tc7_avg) + ";" + String(tc8_avg) + ";");
+  Serial.println(String(tc1_avg) + "; " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg) + ";" + String(tc6_avg) + ";" + String(tc7_avg) + ";" + String(tc8_avg) + ";");
 }
 
 void actuateHeatingElements()
 {
   // select whichever thermocouple/relay pairs you want to actuate
   if (tc2_avg > temp_sp1)
+  {
     digitalWrite(RELAY1_PIN, HIGH);
+    sp1_reached = 1; // hit the setpoint
+  }
   else
+  {
     digitalWrite(RELAY1_PIN, LOW);
+    sp2_reached = 1; // hit the setpoint
+  }
 
   if (tc3_avg > temp_sp2)
+  {
     digitalWrite(RELAY2_PIN, HIGH);
+    sp3_reached = 1; // hit the setpoint
+  }
   else
+  {
     digitalWrite(RELAY2_PIN, LOW);
+  }
 
   if (tc4_avg > temp_sp3)
+  {
     digitalWrite(RELAY3_PIN, HIGH);
+    sp4_reached = 1; // hit the setpoint
+  }
   else
+  {
     digitalWrite(RELAY3_PIN, LOW);
+  }
 
   if (tc5_avg > temp_sp4)
+  {
     digitalWrite(RELAY4_PIN, HIGH);
+  }
   else
+  {
     digitalWrite(RELAY4_PIN, LOW);
+  }
 }
 
 void precursorValveActuation()
@@ -248,10 +278,11 @@ void loop()
 {
   // check if all ALD pulses have finished
   if (JOB_IN_PROGRESS && (num_pulse1 == 0) && (num_pulse2 == 0) && (num_pulse3 == 0))
-    {
-      JOB_IN_PROGRESS = 0;
-      Serial.println("Job is done!");
-    }
+  {
+    JOB_IN_PROGRESS = 0;
+    Serial.println("Job is done!");
+    while(1);
+  }
 
   // job parsing code
   if ((Serial.available() > 0) && (!JOB_IN_PROGRESS))
@@ -261,16 +292,19 @@ void loop()
     String inputString = Serial.readStringUntil('\n'); // Read until newline character
     strcpy(s, inputString.c_str());
     
-    // s = "8,500.0,12,200.0,4,1200.0,300.0,180.0,120.0,250.0"; // example job
+    // s = "8,500,12,200,4,1200,300,180,120,250"; // example job
 
-    int result = sscanf(s, "%u,%ld,%u,%ld,%u,%ld,%f,%f,%f,%f", &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp1, &temp_sp2, &temp_sp3, &temp_sp4);
+    Serial.println(s);
+    int result = sscanf(s, "%u,%lu,%u,%lu,%u,%lu,%d,%d,%d,%d", &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp1, &temp_sp2, &temp_sp3, &temp_sp4);
 
     // unable to parse command-line input properly
     if (result != 10)
     {
-      Serial.println("BAD JOB!");
+      Serial.println("BAD JOB! sscanf result: ");
+      Serial.println(result);
       return;
     } else {
+      Serial.println("Starting job!");
       JOB_IN_PROGRESS = 1;
     }
   }
@@ -281,7 +315,8 @@ void loop()
     readThermocouples();
     actuateHeatingElements();
 
-    // ALD valve control
-    precursorValveActuation();
+    // ALD valve control once temperature targets are hit
+    if (all_sp_reached)
+      precursorValveActuation();
   }
 }
