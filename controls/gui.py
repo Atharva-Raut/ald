@@ -18,11 +18,12 @@ def arduino_handler():
     while True:
         # data = "0;100;200;300;400;0;0;0;0" # example string
         data = ser.readline().strip()
-        split_data = data.split(";")
-        tc2.set(split_data[1])
-        tc3.set(split_data[2])
-        tc4.set(split_data[3])
-        tc5.set(split_data[4])
+        print(data)
+        # split_data = data.split(";")
+        # tc2.set(split_data[1])
+        # tc3.set(split_data[2])
+        # tc4.set(split_data[3])
+        # tc5.set(split_data[4])
 
 def send_to_arduino():
     if ser:
@@ -46,6 +47,13 @@ def send_to_arduino():
 
         ser.write(text_to_send.encode('utf-8'))
         print(f"Sent: {text_to_send}")
+    else:
+        print("Serial port not connected.")
+
+def begin_job():
+    if ser:
+        ser.write("BEGIN".encode('utf-8'))
+        print("BEGIN")
     else:
         print("Serial port not connected.")
 
@@ -106,6 +114,7 @@ tc5 = tk.StringVar()
 tk.Label(root, textvariable=tc5).grid(row=10, column=2, sticky='w')
 
 tk.Button(root, text="Send job to Arduino", command=send_to_arduino).grid(row=11, column=1, sticky='w')
+tk.Button(root, text="Begin job!", command=begin_job).grid(row=11, column=2, sticky='w')
 
 threading.Thread(target=arduino_handler, daemon=True).start()
 root.mainloop()
