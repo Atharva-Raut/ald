@@ -1,11 +1,10 @@
 import tkinter as tk
 import serial #Serial imported for Serial communication
 import threading
+import time
 
 # Create the master object
 root = tk.Tk()
-
-# ArduinoSerial = serial.Serial('com5', 9600) #Create Serial port object called arduinoSerialData
 
 # Configure serial port (adjust COM port and baud rate)
 try:
@@ -17,8 +16,8 @@ except serial.SerialException as e:
 
 def arduino_handler():
     while True:
-        # data = ArduinoSerial.readline().strip()
-        data = "0;100;200;300;400;0;0;0" # example string
+        # data = "0;100;200;300;400;0;0;0;0" # example string
+        data = ser.readline().strip()
         split_data = data.split(";")
         tc2.set(split_data[1])
         tc3.set(split_data[2])
@@ -27,37 +26,101 @@ def arduino_handler():
 
 def send_to_arduino():
     if ser:
-        text_to_send = entry_widget.get()
+        purge_txt = purge_entry.get()
+
+        v1_numpulse_txt = v1_numpulse_entry.get()
+        v1_pulsetime_txt = v1_pulsetime_entry.get()
+        v2_numpulse_txt = v2_numpulse_entry.get()
+        v2_pulsetime_txt = v2_pulsetime_entry.get()
+        v3_numpulse_txt = v3_numpulse_entry.get()
+        v3_pulsetime_txt = v3_pulsetime_entry.get()
+        valve_txt = str(v1_numpulse_txt) + ";" + str(v1_pulsetime_txt) + ";" + str(v2_numpulse_txt) + ";" + str(v2_pulsetime_txt) + ";" + str(v3_numpulse_txt) + ";" + str(v3_pulsetime_txt) + ";"
+
+        tc2_txt = tc2_entry.get()
+        tc3_txt = tc3_entry.get()
+        tc4_txt = tc4_entry.get()
+        tc5_txt = tc5_entry.get()
+        tc_txt = str(tc2_txt) + ";" + str(tc3_txt) + ";" + str(tc4_txt) + ";" + str(tc5_txt) + ";"
+
+        text_to_send = purge_txt + ";" + valve_txt + tc_txt
+
         ser.write(text_to_send.encode('utf-8'))
         print(f"Sent: {text_to_send}")
     else:
         print("Serial port not connected.")
 
+tk.Label(root, text="Purge Time (ms):").grid(row=0, column=0, sticky='w')
+# Create Entry widget
+purge_entry = tk.Entry(root, width=50)
+purge_entry.grid(row=0, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 1 Num. Pulses:").grid(row=1, column=0, sticky='w')
+v1_numpulse_entry = tk.Entry(root, width=50)
+v1_numpulse_entry.grid(row=1, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 1 Pulse Time (ms):").grid(row=2, column=0, sticky='w')
+v1_pulsetime_entry = tk.Entry(root, width=50)
+v1_pulsetime_entry.grid(row=2, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 2 Num. Pulses:").grid(row=3, column=0, sticky='w')
+v2_numpulse_entry = tk.Entry(root, width=50)
+v2_numpulse_entry.grid(row=3, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 2 Pulse Time (ms):").grid(row=4, column=0, sticky='w')
+v2_pulsetime_entry = tk.Entry(root, width=50)
+v2_pulsetime_entry.grid(row=4, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 3 Num. Pulses:").grid(row=5, column=0, sticky='w')
+v3_numpulse_entry = tk.Entry(root, width=50)
+v3_numpulse_entry.grid(row=5, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+tk.Label(root, text="ALD Valve 3 Pulse Time (ms):").grid(row=6, column=0, sticky='w')
+v3_pulsetime_entry = tk.Entry(root, width=50)
+v3_pulsetime_entry.grid(row=6, column=1, sticky='w')
+# tc5 = tk.StringVar()
+# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 # display thermocouple data
-tk.Label(root, text="Thermocouple 2 (Delivery Line):" ).grid(row=0, column=0, sticky='w')
+tk.Label(root, text="Thermocouple 2 (Delivery Line):" ).grid(row=7, column=0, sticky='w')
+tc2_entry = tk.Entry(root, width=50)
+tc2_entry.grid(row=7, column=1, sticky='w')
 tc2 = tk.StringVar()
-tk.Label(root, textvariable=tc2).grid(row=0, column=1, sticky='w')
+tk.Label(root, textvariable=tc2).grid(row=7, column=2, sticky='w')
 
-tk.Label(root, text="Thermocouple 3 (Precursor 1):" ).grid(row=1, column=0, sticky='w')
+tk.Label(root, text="Thermocouple 3 (Precursor 1):" ).grid(row=8, column=0, sticky='w')
+tc3_entry = tk.Entry(root, width=50)
+tc3_entry.grid(row=8, column=1, sticky='w')
 tc3 = tk.StringVar()
-tk.Label(root, textvariable=tc3).grid(row=1, column=1, sticky='w')
+tk.Label(root, textvariable=tc3).grid(row=8, column=2, sticky='w')
 
-tk.Label(root, text="Thermocouple 4 (Precursor 2):" ).grid(row=2, column=0, sticky='w')
+tk.Label(root, text="Thermocouple 4 (Precursor 2):" ).grid(row=9, column=0, sticky='w')
+tc4_entry = tk.Entry(root, width=50)
+tc4_entry.grid(row=9, column=1, sticky='w')
 tc4 = tk.StringVar()
-tk.Label(root, textvariable=tc4).grid(row=2, column=1, sticky='w')
+tk.Label(root, textvariable=tc4).grid(row=9, column=2, sticky='w')
 
-tk.Label(root, text="Thermocouple 5 (Substrate Heater):").grid(row=3, column=0, sticky='w')
+tk.Label(root, text="Thermocouple 5 (Substrate Heater):").grid(row=10, column=0, sticky='w')
+tc5_entry = tk.Entry(root, width=50)
+tc5_entry.grid(row=10, column=1, sticky='w')
 tc5 = tk.StringVar()
-tk.Label(root, textvariable=tc5).grid(row=3, column=1, sticky='w')
-
-# Create Entry widget
-tk.Entry(root, width=50).grid(row=5, column=0, sticky='w')
-# entry_widget.pack(pady=10)
+tk.Label(root, textvariable=tc5).grid(row=10, column=2, sticky='w')
 
 # Create Send Button
-tk.Button(root, text="Send job to Arduino", command=send_to_arduino).grid(row=6, column=0, sticky='w')
-# send_button.pack(pady=5)
+tk.Button(root, text="Send job to Arduino", command=send_to_arduino).grid(row=11, column=1, sticky='w')
 
 threading.Thread(target=arduino_handler, daemon=True).start()
 root.mainloop()
