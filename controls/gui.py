@@ -50,51 +50,37 @@ def send_to_arduino():
         print("Serial port not connected.")
 
 tk.Label(root, text="Purge Time (ms):").grid(row=0, column=0, sticky='w')
-# Create Entry widget
 purge_entry = tk.Entry(root, width=50)
 purge_entry.grid(row=0, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
+
+
 
 tk.Label(root, text="ALD Valve 1 Num. Pulses:").grid(row=1, column=0, sticky='w')
 v1_numpulse_entry = tk.Entry(root, width=50)
 v1_numpulse_entry.grid(row=1, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 tk.Label(root, text="ALD Valve 1 Pulse Time (ms):").grid(row=2, column=0, sticky='w')
 v1_pulsetime_entry = tk.Entry(root, width=50)
 v1_pulsetime_entry.grid(row=2, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 tk.Label(root, text="ALD Valve 2 Num. Pulses:").grid(row=3, column=0, sticky='w')
 v2_numpulse_entry = tk.Entry(root, width=50)
 v2_numpulse_entry.grid(row=3, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 tk.Label(root, text="ALD Valve 2 Pulse Time (ms):").grid(row=4, column=0, sticky='w')
 v2_pulsetime_entry = tk.Entry(root, width=50)
 v2_pulsetime_entry.grid(row=4, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 tk.Label(root, text="ALD Valve 3 Num. Pulses:").grid(row=5, column=0, sticky='w')
 v3_numpulse_entry = tk.Entry(root, width=50)
 v3_numpulse_entry.grid(row=5, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
 tk.Label(root, text="ALD Valve 3 Pulse Time (ms):").grid(row=6, column=0, sticky='w')
 v3_pulsetime_entry = tk.Entry(root, width=50)
 v3_pulsetime_entry.grid(row=6, column=1, sticky='w')
-# tc5 = tk.StringVar()
-# tk.Label(root, textvariable=tc5).grid(row=3, column=2, sticky='w')
 
-# display thermocouple data
+
+
 tk.Label(root, text="Thermocouple 2 (Delivery Line):" ).grid(row=7, column=0, sticky='w')
 tc2_entry = tk.Entry(root, width=50)
 tc2_entry.grid(row=7, column=1, sticky='w')
@@ -119,7 +105,6 @@ tc5_entry.grid(row=10, column=1, sticky='w')
 tc5 = tk.StringVar()
 tk.Label(root, textvariable=tc5).grid(row=10, column=2, sticky='w')
 
-# Create Send Button
 tk.Button(root, text="Send job to Arduino", command=send_to_arduino).grid(row=11, column=1, sticky='w')
 
 threading.Thread(target=arduino_handler, daemon=True).start()
