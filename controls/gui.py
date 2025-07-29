@@ -1,4 +1,6 @@
 import tkinter as tk
+import tkinter.scrolledtext as st
+
 import serial #Serial imported for Serial communication
 import threading
 import time
@@ -16,10 +18,10 @@ except serial.SerialException as e:
 
 def arduino_handler():
     while True:
-        # data = "0;100;200;300;400;0;0;0;0" # example string
+        # data = "0;100;200;300;400;0;0;0;0\n" # example string
         data = ser.readline().strip()
-        log.set(data)
-        print(data)
+        log_box.insert(tk.INSERT, data)
+
         # split_data = data.split(";")
         # tc2.set(split_data[1])
         # tc3.set(split_data[2])
@@ -114,11 +116,19 @@ tc5_entry.grid(row=10, column=1, sticky='w')
 tc5 = tk.StringVar()
 tk.Label(root, textvariable=tc5).grid(row=10, column=2, sticky='w')
 
+
+
 tk.Button(root, text="Send job to Arduino", command=send_to_arduino).grid(row=11, column=1, sticky='w')
 tk.Button(root, text="Begin job!", command=begin_job).grid(row=11, column=2, sticky='w')
 
-log = tk.StringVar()
-tk.Label(root, textvariable=log).grid(row=12, column=0, sticky='w')
+
+
+# log = tk.StringVar()
+# tk.Label(root, textvariable=log).grid(row=12, column=0, sticky='w')
+log_box = st.ScrolledText(root, width=50, height=10, wrap=tk.WORD)
+log_box.grid(row=12, column=0, sticky='w')
+
+
 
 threading.Thread(target=arduino_handler, daemon=True).start()
 root.mainloop()
