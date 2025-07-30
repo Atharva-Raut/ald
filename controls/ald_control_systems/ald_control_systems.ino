@@ -233,7 +233,7 @@ void actuateHeatingElements()
 }
 
 // close ALD valves to allow for system purge using carrier gas
-void purgeSystem()
+void closeALDValves()
 {
   digitalWrite(RELAY6_PIN, HIGH);
   digitalWrite(RELAY7_PIN, HIGH);
@@ -246,9 +246,10 @@ void precursorValveActuation()
   unsigned long currentMillis = millis();
 
   // valve 1
-  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1) && !purging) {
+  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1)) {
     // Save the last time you toggled the pin
     previousMillis_1 = currentMillis;
+    pulse_time1 -= purge_time;
 
     // Toggle output pin and set the output pin to the new state
     outputState_1 = !outputState_1;
@@ -258,15 +259,17 @@ void precursorValveActuation()
     if (outputState_1 == HIGH)
     {
       num_pulse1--;
-      purging = HIGH;
+      pulse_time2 += purge_time; // add extra wait time for purging
       current_valve = 2; // move to next valve
     }
   }
 
   // valve 2
-  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2) && !purging) {
+  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2)) {
     // Save the last time you toggled the pin
     previousMillis_2 = currentMillis;
+    pulse_time2 -= purge_time;
+
 
     // Toggle output pin and set the output pin to the new state
     outputState_2 = !outputState_2;
@@ -276,7 +279,7 @@ void precursorValveActuation()
     if (outputState_2 == HIGH)
     {
       num_pulse2--;
-      purging = HIGH;
+      pulse_time3 += purge_time; // add extra wait time for purging
       current_valve = 3; // move to next valve
     }
   }
@@ -285,6 +288,7 @@ void precursorValveActuation()
   if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3) && !purging) {
     // Save the last time you toggled the pin
     previousMillis_3 = currentMillis;
+    pulse_time3 -= purge_time;
 
     // Toggle output pin and set the output pin to the new state
     outputState_3 = !outputState_3;
@@ -294,22 +298,8 @@ void precursorValveActuation()
     if (outputState_3 == HIGH)
     {
       num_pulse3--;
-      purging = HIGH;
+      pulse_time1 += purge_time; // add extra wait time for purging
       current_valve = 1; // move to next valve
-    }
-  }
-
-  if (purging)
-  {
-    // check if done purging
-    if ((currentMillis - previousMillis_4 >= purge_time))
-    {
-      // timestamp
-      previousMillis_4 = currentMillis;
-      purging = LOW;
-    } else
-    {
-      purgeSystem();
     }
   }
 }
@@ -318,7 +308,7 @@ void loop()
 {
   if (!JOB_IN_PROGRESS)
   {
-    purgeSystem();
+    closeALDValves();
     
     // job parsing code
     if ((Serial.available() > 0))
