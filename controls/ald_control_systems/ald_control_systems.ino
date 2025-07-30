@@ -257,7 +257,6 @@ void precursorValveActuation()
     if (outputState_1 == LOW)
     {
       num_pulse1--;
-      purgeSystem();
       current_valve = 2; // move to next valve
     }
   }
@@ -275,7 +274,6 @@ void precursorValveActuation()
     if (outputState_2 == LOW)
     {
       num_pulse2--;
-      purgeSystem();
       current_valve = 3; // move to next valve
     }
   }
@@ -293,7 +291,6 @@ void precursorValveActuation()
     if (outputState_3 == LOW)
     {
       num_pulse3--;
-      purgeSystem();
       current_valve = 1; // move to next valve
     }
   }
