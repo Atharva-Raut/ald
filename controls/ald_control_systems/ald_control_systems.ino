@@ -257,6 +257,8 @@ void precursorValveActuation()
     // we closed the valve and allowed for purging
     if ((outputState_1 == HIGH))
     {
+      delay(purge_time);
+      previousMillis_1 = 0;
       num_pulse1--;
       current_valve = 2; // move to next valve
     }
@@ -274,6 +276,8 @@ void precursorValveActuation()
     // we closed the valve and allowed for purging
     if ((outputState_2 == HIGH))
     {
+      delay(purge_time);
+      previousMillis_2 = 0;
       num_pulse2--;
       current_valve = 3; // move to next valve
     }
@@ -291,6 +295,8 @@ void precursorValveActuation()
     // we closed the valve and allowed for purging
     if ((outputState_3 == HIGH))
     {
+      delay(purge_time);
+      previousMillis_3 = 0;
       num_pulse3--;
       current_valve = 1; // move to next valve
     }
