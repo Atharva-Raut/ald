@@ -1,3 +1,6 @@
+# ALD GUI
+# Hacker Fab 2025
+# Joel Gonzalez
 import tkinter as tk
 import tkinter.scrolledtext as st
 

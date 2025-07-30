@@ -75,13 +75,14 @@ Adafruit_MAX31855 thermocouples[8] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4)
 
 // set temperature setpoints for heating elements
 int temp_sp2 = 0.0; // 
-unsigned int sp2_reached = 0;
+bool sp2_reached = LOW;
 int temp_sp3 = 0.0;
-unsigned int sp3_reached = 0;
+bool sp3_reached = LOW;
 int temp_sp4 = 0.0; // 
-unsigned int sp4_reached = 0;
+bool sp4_reached = LOW;
 int temp_sp5 = 0.0; // substrate heater
-unsigned int sp5_reached = 0;
+bool sp5_reached = LOW;
+bool all_sp_reached = LOW; // check for all temperature setpoints
 
 unsigned int current_valve = 1;
 unsigned int valve_actuation_started = 0;
@@ -103,7 +104,7 @@ bool outputState_3 = LOW;
 
 unsigned int purge_time = 0; // milliseconds
 
-unsigned int JOB_IN_PROGRESS = 0;
+bool JOB_IN_PROGRESS = LOW;
 
 void setup()
 {
@@ -224,6 +225,9 @@ void actuateHeatingElements()
   {
     digitalWrite(RELAY1_PIN, LOW);
   }
+
+  if (sp2_reached && sp3_reached && sp4_reached && sp5_reached)
+    all_sp_reached = HIGH;
 }
 
 // close ALD valves to allow for system purge using carrier gas
@@ -319,7 +323,7 @@ void loop()
         return;
       } else {
         Serial.println("Starting job!");
-        JOB_IN_PROGRESS = 1;
+        JOB_IN_PROGRESS = HIGH;
       }
     }
   }
@@ -332,8 +336,7 @@ void loop()
     actuateHeatingElements();
 
     // ALD valve control once temperature targets are hit
-    // if (sp2_reached && sp3_reached && sp4_reached && sp5_reached)
-    if (1)
+    if (all_sp_reached)
     {
       if (!valve_actuation_started)
       {
