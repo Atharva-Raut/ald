@@ -249,17 +249,16 @@ void precursorValveActuation()
   if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1)) {
     // Save the last time you toggled the pin
     previousMillis_1 = currentMillis;
-    pulse_time1 -= purge_time;
 
     // Toggle output pin and set the output pin to the new state
     outputState_1 = !outputState_1;
     digitalWrite(RELAY6_PIN, outputState_1);
 
-    // we just closed the valve
-    if (outputState_1 == HIGH)
+    // we closed the valve and allowed for purging
+    bool purgeComplete = (currentMillis - previousMillis_1 >= pulse_time1 + purge_time);
+    if (outputState_1 == HIGH && purgeComplete)
     {
       num_pulse1--;
-      pulse_time2 += purge_time; // add extra wait time for purging
       current_valve = 2; // move to next valve
     }
   }
@@ -268,37 +267,34 @@ void precursorValveActuation()
   if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2)) {
     // Save the last time you toggled the pin
     previousMillis_2 = currentMillis;
-    pulse_time2 -= purge_time;
-
 
     // Toggle output pin and set the output pin to the new state
     outputState_2 = !outputState_2;
     digitalWrite(RELAY7_PIN, outputState_2);
 
-    // we just closed the valve
-    if (outputState_2 == HIGH)
+    // we closed the valve and allowed for purging
+    bool purgeComplete = (currentMillis - previousMillis_2 >= pulse_time2 + purge_time);
+    if (outputState_2 == HIGH && purgeComplete)
     {
       num_pulse2--;
-      pulse_time3 += purge_time; // add extra wait time for purging
       current_valve = 3; // move to next valve
     }
   }
 
   // valve 3
-  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3) && !purging) {
+  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3)) {
     // Save the last time you toggled the pin
     previousMillis_3 = currentMillis;
-    pulse_time3 -= purge_time;
 
     // Toggle output pin and set the output pin to the new state
     outputState_3 = !outputState_3;
     digitalWrite(RELAY8_PIN, outputState_3);
 
-    // we just closed the valve
-    if (outputState_3 == HIGH)
+    // we closed the valve and allowed for purging
+    bool purgeComplete = (currentMillis - previousMillis_3 >= pulse_time3 + purge_time);
+    if (outputState_3 == HIGH && purgeComplete)
     {
       num_pulse3--;
-      pulse_time1 += purge_time; // add extra wait time for purging
       current_valve = 1; // move to next valve
     }
   }
