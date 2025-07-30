@@ -235,9 +235,9 @@ void actuateHeatingElements()
 // close ALD valves to allow for system purge using carrier gas
 void purgeSystem()
 {
-  digitalWrite(RELAY6_PIN, LOW);
-  digitalWrite(RELAY7_PIN, LOW);
-  digitalWrite(RELAY8_PIN, LOW);
+  digitalWrite(RELAY6_PIN, HIGH);
+  digitalWrite(RELAY7_PIN, HIGH);
+  digitalWrite(RELAY8_PIN, HIGH);
 }
 
 void precursorValveActuation()
