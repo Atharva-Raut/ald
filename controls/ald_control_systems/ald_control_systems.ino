@@ -102,7 +102,9 @@ unsigned long previousMillis_3 = 0;
 unsigned long pulse_time3 = 0; // Interval for toggling the pin (in milliseconds)
 bool outputState_3 = LOW;
 
+unsigned long previousMillis_4 = 0;
 unsigned int purge_time = 0; // milliseconds
+bool purging = LOW;
 
 bool JOB_IN_PROGRESS = LOW;
 
@@ -236,7 +238,6 @@ void purgeSystem()
   digitalWrite(RELAY6_PIN, LOW);
   digitalWrite(RELAY7_PIN, LOW);
   digitalWrite(RELAY8_PIN, LOW);
-  delay(purge_time);
 }
 
 void precursorValveActuation()
@@ -245,7 +246,7 @@ void precursorValveActuation()
   unsigned long currentMillis = millis();
 
   // valve 1
-  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1)) {
+  if ((currentMillis - previousMillis_1 >= pulse_time1) && (num_pulse1 > 0) && (current_valve == 1) && !purging) {
     // Save the last time you toggled the pin
     previousMillis_1 = currentMillis;
 
@@ -257,12 +258,13 @@ void precursorValveActuation()
     if (outputState_1 == LOW)
     {
       num_pulse1--;
+      purging = HIGH;
       current_valve = 2; // move to next valve
     }
   }
 
   // valve 2
-  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2)) {
+  if ((currentMillis - previousMillis_2 >= pulse_time2) && (num_pulse2 > 0) && (current_valve == 2) && !purging) {
     // Save the last time you toggled the pin
     previousMillis_2 = currentMillis;
 
@@ -274,12 +276,13 @@ void precursorValveActuation()
     if (outputState_2 == LOW)
     {
       num_pulse2--;
+      purging = HIGH;
       current_valve = 3; // move to next valve
     }
   }
 
   // valve 3
-  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3)) {
+  if ((currentMillis - previousMillis_3 >= pulse_time3) && (num_pulse3 > 0) && (current_valve == 3) && !purging) {
     // Save the last time you toggled the pin
     previousMillis_3 = currentMillis;
 
@@ -291,7 +294,18 @@ void precursorValveActuation()
     if (outputState_3 == LOW)
     {
       num_pulse3--;
+      purging = HIGH;
       current_valve = 1; // move to next valve
+    }
+  }
+
+  if (purging)
+  {
+    purgeSystem();
+    // check if done purging
+    if ((currentMillis - previousMillis_4 >= purge_time))
+    {
+      purging = LOW;
     }
   }
 }
