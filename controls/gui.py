@@ -19,7 +19,7 @@ except serial.SerialException as e:
 def arduino_handler():
     while True:
         # data = "0;100;200;300;400;0;0;0;0\n" # example string
-        log_box.insert(tk.INSERT, ser.readline())
+        log_box.insert(tk.END, ser.readline())
 
         # split_data = data.split(";")
         # tc2.set(split_data[1])
