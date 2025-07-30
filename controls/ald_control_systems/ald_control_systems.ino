@@ -82,7 +82,7 @@ int temp_sp4 = 0.0; //
 bool sp4_reached = LOW;
 int temp_sp5 = 0.0; // substrate heater
 bool sp5_reached = LOW;
-bool all_sp_reached = LOW; // check for all temperature setpoints
+bool all_sp_reached = HIGH; // check for all temperature setpoints
 
 unsigned int current_valve = 1;
 unsigned int valve_actuation_started = 0;
@@ -313,7 +313,7 @@ void loop()
       // s = "3000,8,500,12,200,4,1200,300,180,120,250"; // example job
 
       Serial.println(s);
-      int result = sscanf(s, "%u,%u,%lu,%u,%lu,%u,%lu,%d,%d,%d,%d", &purge_time, &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp2, &temp_sp3, &temp_sp4, &temp_sp5);
+      int result = sscanf(s, "%u;%u;%lu;%u;%lu;%u;%lu;%d;%d;%d;%d", &purge_time, &num_pulse1, &pulse_time1, &num_pulse2, &pulse_time2, &num_pulse3, &pulse_time3, &temp_sp2, &temp_sp3, &temp_sp4, &temp_sp5);
 
       // unable to parse command-line input properly
       if (result != 11)
