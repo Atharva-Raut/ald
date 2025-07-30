@@ -90,17 +90,17 @@ unsigned int valve_actuation_started = 0;
 unsigned int num_pulse1 = 0;
 unsigned long previousMillis_1 = 0;
 unsigned long pulse_time1 = 0; // Interval for toggling the pin (in milliseconds)
-bool outputState_1 = LOW;
+bool outputState_1 = HIGH;
 
 unsigned int num_pulse2 = 0;
 unsigned long previousMillis_2 = 0;
 unsigned long pulse_time2 = 0; // Interval for toggling the pin (in milliseconds)
-bool outputState_2 = LOW;
+bool outputState_2 = HIGH;
 
 unsigned int num_pulse3 = 0;
 unsigned long previousMillis_3 = 0;
 unsigned long pulse_time3 = 0; // Interval for toggling the pin (in milliseconds)
-bool outputState_3 = LOW;
+bool outputState_3 = HIGH;
 
 unsigned long previousMillis_4 = 0;
 unsigned int purge_time = 0; // milliseconds
