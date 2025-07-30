@@ -301,11 +301,13 @@ void precursorValveActuation()
 
   if (purging)
   {
-    // purgeSystem();
     // check if done purging
     if ((currentMillis - previousMillis_4 >= purge_time))
     {
       purging = LOW;
+    } else
+    {
+      purgeSystem();
     }
   }
 }
