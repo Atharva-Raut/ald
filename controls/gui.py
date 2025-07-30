@@ -20,7 +20,7 @@ def arduino_handler():
     while True:
         # data = "0;100;200;300;400;0;0;0;0\n" # example string
         data = ser.readline().strip()
-        log_box.insert(tk.INSERT, data)
+        log_box.insert(tk.INSERT, "{data}\n")
 
         # split_data = data.split(";")
         # tc2.set(split_data[1])
