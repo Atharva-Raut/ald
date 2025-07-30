@@ -254,9 +254,10 @@ void precursorValveActuation()
     digitalWrite(RELAY6_PIN, outputState_1);
 
     // we just closed the valve
-    if (outputState_1 == HIGH)
+    if (outputState_1 == LOW)
     {
       num_pulse1--;
+      purgeSystem();
       current_valve = 2; // move to next valve
     }
   }
@@ -271,9 +272,10 @@ void precursorValveActuation()
     digitalWrite(RELAY7_PIN, outputState_2);
 
     // we just closed the valve
-    if (outputState_2 == HIGH)
+    if (outputState_2 == LOW)
     {
       num_pulse2--;
+      purgeSystem();
       current_valve = 3; // move to next valve
     }
   }
@@ -288,9 +290,10 @@ void precursorValveActuation()
     digitalWrite(RELAY8_PIN, outputState_3);
 
     // we just closed the valve
-    if (outputState_3 == HIGH)
+    if (outputState_3 == LOW)
     {
       num_pulse3--;
+      purgeSystem();
       current_valve = 1; // move to next valve
     }
   }
