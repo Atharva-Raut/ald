@@ -254,11 +254,13 @@ void precursorValveActuation()
     outputState_1 = !outputState_1;
     digitalWrite(RELAY6_PIN, outputState_1);
 
-    // we closed the valve and allowed for purging
+    // we just closed the valve, so allow for purging
     if ((outputState_1 == HIGH))
     {
       delay(purge_time);
+      previousMillis_1 = 0;
       previousMillis_2 = 0;
+      previousMillis_3 = 0;
       num_pulse1--;
       current_valve = 2; // move to next valve
     }
@@ -273,10 +275,12 @@ void precursorValveActuation()
     outputState_2 = !outputState_2;
     digitalWrite(RELAY7_PIN, outputState_2);
 
-    // we closed the valve and allowed for purging
+    // we just closed the valve, so allow for purging
     if ((outputState_2 == HIGH))
     {
       delay(purge_time);
+      previousMillis_1 = 0;
+      previousMillis_2 = 0;
       previousMillis_3 = 0;
       num_pulse2--;
       current_valve = 3; // move to next valve
@@ -292,11 +296,13 @@ void precursorValveActuation()
     outputState_3 = !outputState_3;
     digitalWrite(RELAY8_PIN, outputState_3);
 
-    // we closed the valve and allowed for purging
+    // we just closed the valve, so allow for purging
     if ((outputState_3 == HIGH))
     {
       delay(purge_time);
       previousMillis_1 = 0;
+      previousMillis_2 = 0;
+      previousMillis_3 = 0;
       num_pulse3--;
       current_valve = 1; // move to next valve
     }
