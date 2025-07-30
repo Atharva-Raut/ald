@@ -304,6 +304,8 @@ void precursorValveActuation()
     // check if done purging
     if ((currentMillis - previousMillis_4 >= purge_time))
     {
+      // timestamp
+      previousMillis_4 = currentMillis;
       purging = LOW;
     } else
     {
