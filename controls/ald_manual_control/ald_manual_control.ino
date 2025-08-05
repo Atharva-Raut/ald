@@ -65,7 +65,7 @@ int temp_sp5 = 0; // substrate heater
 
 unsigned int which_valve = 0; // 1, 2, or 3
 unsigned int num_pulse = 0; // positive integer value
-unsigned long pulse_time = 0; // ms
+unsigned int pulse_time = 0; // ms
 unsigned int purge_time = 0; // ms
 
 void setup()
@@ -83,6 +83,14 @@ void setup()
   pinMode(RELAY6_PIN, OUTPUT);
   pinMode(RELAY7_PIN, OUTPUT);
   pinMode(RELAY8_PIN, OUTPUT);
+
+  digitalWrite(RELAY1_PIN, HIGH);
+  digitalWrite(RELAY2_PIN, HIGH);
+  digitalWrite(RELAY3_PIN, HIGH);
+  digitalWrite(RELAY4_PIN, HIGH);
+  digitalWrite(RELAY6_PIN, HIGH);
+  digitalWrite(RELAY7_PIN, HIGH);
+  digitalWrite(RELAY8_PIN, HIGH);
 
   // K-type: pins 3,4,5,6
   // J-type: pins 7,8,9,10
@@ -142,7 +150,7 @@ void readThermocouples()
   // tc7_avg = sum7 / count;
   // tc8_avg = sum8 / count;
 
-  Serial.println(String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
+  // Serial.println(String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
 }
 
 void actuateHeatingElements()
@@ -178,8 +186,11 @@ void precursorValveActuation()
     case 1:
       while(num_pulse>0)
       {
+        Serial.println("Pulsing valve 1");
         digitalWrite(RELAY6_PIN, LOW);
         delay(pulse_time);
+
+        Serial.println("Purging line");
         digitalWrite(RELAY6_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -189,8 +200,11 @@ void precursorValveActuation()
     case 2:
       while(num_pulse>0)
       {
+        Serial.println("Pulsing valve 2");
         digitalWrite(RELAY7_PIN, LOW);
         delay(pulse_time);
+
+        Serial.println("Purging line");
         digitalWrite(RELAY7_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -200,8 +214,11 @@ void precursorValveActuation()
     case 3:
       while(num_pulse>0)
       {
+        Serial.println("Pulsing valve 3");
         digitalWrite(RELAY8_PIN, LOW);
         delay(pulse_time);
+
+        Serial.println("Purging line");
         digitalWrite(RELAY8_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -209,23 +226,23 @@ void precursorValveActuation()
       break;
 
     default:
+      Serial.println("No valve selected");
       return;
   }
 }
 
 void loop()
 { 
-  // job parsing code
+  // command parsing code
   if ((Serial.available() > 0))
   {
-    // job parsing code
     Serial.println("Got command!");
     char s[100] = {0};
     String inputString = Serial.readStringUntil('\n'); // Read until newline character
     strcpy(s, inputString.c_str());
     
     // s = "t;100;200;150;90"; // example temp. command
-    // s = "t;2;5;1000;3000"; // example valve command
+    // s = "v;2;5;1000;3000"; // example valve command
 
     Serial.println(s);
     int result = 0;
@@ -234,16 +251,20 @@ void loop()
     if (s[0] == 't')
     {
       tc_active = 1;
-      result = sscanf(s, "t;%d;%d;%d;%d", temp_sp2, temp_sp3, temp_sp4, temp_sp5);
+      result = sscanf(s, "t%d;%d;%d;%d", &temp_sp2, &temp_sp3, &temp_sp4, &temp_sp5);
     } else if (s[0] == 'v') // ALD valve command
     {
-      result = sscanf(s, "v;%u;%lu;%u;%u", which_valve, num_pulse, pulse_time, purge_time);
+      result = sscanf(s, "v%u;%u;%u;%u", &which_valve, &num_pulse, &pulse_time, &purge_time);    
+    } else
+    {
+      Serial.println("BAD COMMAND!");
+      return;
     }
 
     // unable to parse command-line input properly
     if (result != 4)
     {
-      Serial.println("BAD COMMAND! sscanf result: ");
+      Serial.println("MISFORMATTED COMMAND! sscanf result: ");
       Serial.println(result);
       return;
     } else {
