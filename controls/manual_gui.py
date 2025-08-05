@@ -21,15 +21,19 @@ except serial.SerialException as e:
 
 def arduino_handler():
     while True:
-        # data = "100;200;150;90\n" # example string
-        # split_data = data.split(";")
-        # tc2.set(split_data[1])
-        # tc3.set(split_data[2])
-        # tc4.set(split_data[3])
-        # tc5.set(split_data[4])
+        # txt = "blah\n"
+        txt = ser.readline()
 
-        log_box.insert(tk.END, ser.readline())
-        log_box.see(tk.END)
+        if (txt.split(":")[0] == "V"):
+            valve_log_box.insert(tk.END, txt)
+            valve_log_box.see(tk.END)
+        elif (txt.split(":")[0] == "T"):
+            temp_log_box.insert(tk.END, txt)
+            temp_log_box.see(tk.END)
+        else:
+            generic_log_box.insert(tk.END, txt)
+            generic_log_box.see(tk.END)
+        
 
 def send_valve_to_arduino():
     if ser:
@@ -90,11 +94,16 @@ tc5_entry.grid(row=8, column=1, sticky='w')
 tk.Button(root, text="Send temp. info to Arduino", command=send_temp_to_arduino).grid(row=9, column=1, sticky='w')
 
 
-# output box from Arduino
-# log = tk.StringVar()
-# tk.Label(root, textvariable=log).grid(row=12, column=0, sticky='w')
-log_box = st.ScrolledText(root, width=50, height=10, wrap=tk.WORD)
-log_box.grid(row=12, column=0, sticky='w')
+# output boxes from Arduino
+generic_log_box = st.ScrolledText(root, width=50, height=10, wrap=tk.WORD)
+generic_log_box.grid(row=12, column=0, sticky='w')
+
+valve_log_box = st.ScrolledText(root, width=50, height=10, wrap=tk.WORD)
+valve_log_box.grid(row=12, column=1, sticky='w')
+
+temp_log_box = st.ScrolledText(root, width=50, height=10, wrap=tk.WORD)
+temp_log_box.grid(row=12, column=2, sticky='w')
+
 
 
 # begin

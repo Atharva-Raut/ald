@@ -150,7 +150,7 @@ void readThermocouples()
   // tc7_avg = sum7 / count;
   // tc8_avg = sum8 / count;
 
-  // Serial.println(String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
+  Serial.println("T: " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
 }
 
 void actuateHeatingElements()
@@ -186,11 +186,11 @@ void precursorValveActuation()
     case 1:
       while(num_pulse>0)
       {
-        Serial.println("Pulsing valve 1");
+        Serial.println("V: Pulsing valve 1");
         digitalWrite(RELAY6_PIN, LOW);
         delay(pulse_time);
 
-        Serial.println("Purging line");
+        Serial.println("V: Purging line");
         digitalWrite(RELAY6_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -200,11 +200,11 @@ void precursorValveActuation()
     case 2:
       while(num_pulse>0)
       {
-        Serial.println("Pulsing valve 2");
+        Serial.println("V: Pulsing valve 2");
         digitalWrite(RELAY7_PIN, LOW);
         delay(pulse_time);
 
-        Serial.println("Purging line");
+        Serial.println("V: Purging line");
         digitalWrite(RELAY7_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -214,11 +214,11 @@ void precursorValveActuation()
     case 3:
       while(num_pulse>0)
       {
-        Serial.println("Pulsing valve 3");
+        Serial.println("V: Pulsing valve 3");
         digitalWrite(RELAY8_PIN, LOW);
         delay(pulse_time);
 
-        Serial.println("Purging line");
+        Serial.println("V: Purging line");
         digitalWrite(RELAY8_PIN, HIGH);
         delay(purge_time);
         num_pulse--;
@@ -226,7 +226,7 @@ void precursorValveActuation()
       break;
 
     default:
-      Serial.println("No valve selected");
+      Serial.println("V: No valve selected");
       return;
   }
 }
