@@ -58,9 +58,9 @@ Adafruit_MAX31855 thermocouples[8] = {Adafruit_MAX31855(3), Adafruit_MAX31855(4)
 
 // set temperature setpoint for heating elements
 int tc_active = 0;
-int temp_sp2 = 0; // precursor 1
-int temp_sp3 = 0; // precursor 2
-int temp_sp4 = 0; // delivery line
+int temp_sp2 = 0; // delivery line
+int temp_sp3 = 0; // precursor 1
+int temp_sp4 = 0; // precursor 2
 int temp_sp5 = 0; // substrate heater
 
 unsigned int which_valve = 0; // 1, 2, or 3
