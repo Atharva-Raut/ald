@@ -23,11 +23,12 @@ def arduino_handler():
     while True:
         # txt = "blah\n"
         txt = ser.readline()
+        prefix = txt.decode('utf-8').strip(":")
 
-        if (txt.split(":")[0] == "V"):
+        if (prefix[0] == "V"):
             valve_log_box.insert(tk.END, txt)
             valve_log_box.see(tk.END)
-        elif (txt.split(":")[0] == "T"):
+        elif (prefix[0] == "T"):
             temp_log_box.insert(tk.END, txt)
             temp_log_box.see(tk.END)
         else:
