@@ -151,6 +151,7 @@ void readThermocouples()
   // tc8_avg = sum8 / count;
 
   Serial.println("T: " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
+  delay(100);
 }
 
 void actuateHeatingElements()
