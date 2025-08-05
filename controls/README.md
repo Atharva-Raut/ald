@@ -1,5 +1,6 @@
 Files for ALD controls (temperature readings, valve control, etc.)
 
-To run the GUI: python3 gui.py
+To run the manual controls GUI: python manual_gui.py
 
-<img width="409" height="192" alt="image" src="https://github.com/user-attachments/assets/b3b05731-be21-4bb5-83f2-137e69f44f2a" />
+<img width="721" height="412" alt="image" src="https://github.com/user-attachments/assets/b5fd2660-e312-41a6-9a75-039047890444" />
+
