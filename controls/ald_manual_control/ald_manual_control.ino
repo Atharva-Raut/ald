@@ -151,7 +151,7 @@ void readThermocouples()
   // tc8_avg = sum8 / count;
 
   Serial.println("T: " + String(tc2_avg) + "; " + String(tc3_avg) + "; " + String(tc4_avg) + ";" + String(tc5_avg));
-  delay(100);
+  delay(1000);
 }
 
 void actuateHeatingElements()
@@ -258,7 +258,7 @@ void loop()
       result = sscanf(s, "v%u;%u;%u;%u", &which_valve, &num_pulse, &pulse_time, &purge_time);    
     } else
     {
-      Serial.println("BAD COMMAND!");
+      Serial.println("INVALID COMMAND!");
       return;
     }
 
