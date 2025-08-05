@@ -1,4 +1,4 @@
-// ald_control_systems.ino
+// ald_job_execution.ino
 // This file reads thermocouple values and uses them to actuate relays connected to heating elements in order to maintain them at a predetermined setpoint using bang-bang controls.
 // It also actuates ALD valves based on set intervals.
 // It reads user input to execute a "job", which is defined as follows:
