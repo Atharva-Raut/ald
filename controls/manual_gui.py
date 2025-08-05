@@ -33,7 +33,7 @@ def arduino_handler():
 
 def send_valve_to_arduino():
     if ser:
-        valve_txt = "v;" + str(valve_select.get()) + ";" + str(num_pulse.get()) + ";" + str(pulse_time.get()) + ";" + str(purge_time.get())
+        valve_txt = "v" + str(valve_select.get()) + ";" + str(num_pulse.get()) + ";" + str(pulse_time.get()) + ";" + str(purge_time.get())
 
         ser.write(valve_txt.encode('utf-8'))
         print(f"Sent: {valve_txt}")
@@ -42,7 +42,7 @@ def send_valve_to_arduino():
 
 def send_temp_to_arduino():
     if ser:
-        tc_txt = "t;" + str(tc2_entry.get()) + ";" + str(tc3_entry.get()) + ";" + str(tc4_entry.get()) + ";" + str(tc5_entry.get())
+        tc_txt = "t" + str(tc2_entry.get()) + ";" + str(tc3_entry.get()) + ";" + str(tc4_entry.get()) + ";" + str(tc5_entry.get())
 
         ser.write(tc_txt.encode('utf-8'))
         print(f"Sent: {tc_txt}")
