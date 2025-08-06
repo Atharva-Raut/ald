@@ -22,7 +22,7 @@ except serial.SerialException as e:
 def arduino_handler():
     while True:
         # txt = "V: blah\n"
-        txt = ser.readline()
+        txt = ser.readline().decode('utf-8')
 
         if (txt[0] == "V"):
             valve_log_box.insert(tk.END, txt)
