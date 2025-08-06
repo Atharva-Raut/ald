@@ -22,12 +22,13 @@ except serial.SerialException as e:
 def arduino_handler():
     while True:
         # txt = "V: blah\n"
-        txt = ser.readline().decode('utf-8')
+        txt = ser.readline()
+        print(f"Received: {txt}")
 
-        if (txt[0] == "V"):
+        if (txt.decode('utf-8')[0] == "V"):
             valve_log_box.insert(tk.END, txt)
             valve_log_box.see(tk.END)
-        elif (txt[0] == "T"):
+        elif (txt.decode('utf-8')[0] == "T"):
             temp_log_box.insert(tk.END, txt)
             temp_log_box.see(tk.END)
         else:
