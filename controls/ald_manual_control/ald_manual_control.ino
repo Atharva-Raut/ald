@@ -88,9 +88,9 @@ void setup()
   digitalWrite(RELAY2_PIN, HIGH);
   digitalWrite(RELAY3_PIN, HIGH);
   digitalWrite(RELAY4_PIN, HIGH);
-  digitalWrite(RELAY6_PIN, HIGH);
-  digitalWrite(RELAY7_PIN, HIGH);
-  digitalWrite(RELAY8_PIN, HIGH);
+  digitalWrite(RELAY6_PIN, LOW);
+  digitalWrite(RELAY7_PIN, LOW);
+  digitalWrite(RELAY8_PIN, LOW);  // Active HIGH MOSFET
 
   // K-type: pins 3,4,5,6
   // J-type: pins 7,8,9,10
@@ -189,33 +189,33 @@ void precursorValveActuation()
     {
       case 1:
         Serial.println("V: Pulsing valve 1");
-        digitalWrite(RELAY6_PIN, LOW);
+        digitalWrite(RELAY6_PIN, HIGH);
         delay(pulse_time);
 
         Serial.println("V: Purging line");
-        digitalWrite(RELAY6_PIN, HIGH);
+        digitalWrite(RELAY6_PIN, LOW);
         delay(purge_time);
         num_pulse--;
         break;
 
       case 2:
         Serial.println("V: Pulsing valve 2");
-        digitalWrite(RELAY7_PIN, LOW);
+        digitalWrite(RELAY7_PIN, HIGH);
         delay(pulse_time);
 
         Serial.println("V: Purging line");
-        digitalWrite(RELAY7_PIN, HIGH);
+        digitalWrite(RELAY7_PIN, LOW);
         delay(purge_time);
         num_pulse--;
         break;
 
       case 3:
         Serial.println("V: Pulsing valve 3");
-        digitalWrite(RELAY8_PIN, LOW);
+        digitalWrite(RELAY8_PIN, HIGH);
         delay(pulse_time);
 
         Serial.println("V: Purging line");
-        digitalWrite(RELAY8_PIN, HIGH);
+        digitalWrite(RELAY8_PIN, LOW);
         delay(purge_time);
         num_pulse--;
         break;
@@ -227,9 +227,9 @@ void precursorValveActuation()
   } else
   { 
     // close valves when no pulses required (precautionary)
-    digitalWrite(RELAY6_PIN, HIGH);
-    digitalWrite(RELAY7_PIN, HIGH);
-    digitalWrite(RELAY8_PIN, HIGH);
+    digitalWrite(RELAY6_PIN, LOW);
+    digitalWrite(RELAY7_PIN, LOW);
+    digitalWrite(RELAY8_PIN, LOW);
   }
 }
 
@@ -243,18 +243,36 @@ void loop()
     String inputString = Serial.readStringUntil('\n'); // Read until newline character
     strcpy(s, inputString.c_str());
     
-    // s = "s";              // STOP command: reset pulse counter 
+    // s = "s";              // STOP command: exit loop 
+    // s = "r";              // RESET command: reset pulse counter 
     // s = "t;100;200;150;90";  // example temp. command
     // s = "v;2;5;1000;3000";   // example valve command
 
     Serial.println(s);
     int result = 0;
 
-    // reset command
+    // stop command
     if (s[0] == 's')
+    {
+      Serial.println("EMERGENCY STOP command received! Closing all valves, Stopping heating! Shutdown");
+      digitalWrite(RELAY1_PIN, HIGH);
+      digitalWrite(RELAY2_PIN, HIGH);
+      digitalWrite(RELAY3_PIN, HIGH);
+      digitalWrite(RELAY4_PIN, HIGH);
+      digitalWrite(RELAY6_PIN, LOW);
+      digitalWrite(RELAY7_PIN, LOW);
+      digitalWrite(RELAY8_PIN, LOW);  // Active HIGH MOSFET
+      while(1){
+        // do nothing - EMERGENCY STOP state
+        // need to restart program to recover from this state
+      }
+    }
+    // reset command
+    else if (s[0] == 'r')
     {
       num_pulse = 0;
       which_valve = 0;
+      Serial.println("RESET command received! Resetting state!");
     } else
     {
       // temperature command
@@ -264,7 +282,13 @@ void loop()
         result = sscanf(s, "t%d;%d;%d;%d", &temp_sp2, &temp_sp3, &temp_sp4, &temp_sp5);
       } else if (s[0] == 'v') // ALD valve command
       {
-        result = sscanf(s, "v%u;%u;%u;%u", &which_valve, &num_pulse, &pulse_time, &purge_time);    
+        if (num_pulse != 0)
+        {
+          Serial.println("COMMAND IGNORED. Wait for previous command to finish, or issue RESET.")
+        } else
+        {
+          result = sscanf(s, "v%u;%u;%u;%u", &which_valve, &num_pulse, &pulse_time, &purge_time);    
+        }
       } else
       {
         Serial.println("INVALID COMMAND!");
@@ -284,8 +308,15 @@ void loop()
   }
   
   // ALD valve actuation
-  precursorValveActuation();
   // moved outside the conditional so it runs passively when nothing in serial port
+  precursorValveActuation();
+  if (num_pulse == 0)
+  {
+    Serial.println("Previous command has completed. Ready for new command.")
+  }
+  // need to ensure that python doesn't send new command till acknowledgement is received
+  // TODO: @Modid, suggest best method to convey it back to python
+  // Current implementation: simply ignore new pulse commands when previous is ongoing
 
   // heating control loop
   readThermocouples();
