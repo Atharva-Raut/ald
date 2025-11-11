@@ -7,7 +7,16 @@
 // Joel Gonzalez, Haewon Uhm, Atharva Raut
 // Updated 2025-Oct-08
 // Atharva: Verified valve operation is working with new MOSFETs
+// New updates (unverified): Pressure gauge reading
 
+// PIN ALLOCATION
+// 0-1    Reserved (RX,TX)
+// 2      RELAY1 (Substrate heater)
+// 3-10   Thermocouples
+// 11     RELAY2 (Delivery line tape)
+// A0     Pressure Gauge
+// A1-A2  Precursor tapes
+// A3-A5  Valves
 // toggle this if you want the system to do nothing
 #define DO_NOTHING 0
 // relay pins to control relays for heating elements
@@ -16,7 +25,7 @@
 // relay 3 -> precursor 1
 // relay 4 -> precursor 2
 #define RELAY1_PIN 2
-#define RELAY2_PIN A0
+#define RELAY2_PIN 11      // changed from A0 to use that as an analog read pin for pressure gauge
 #define RELAY3_PIN A1
 #define RELAY4_PIN A2
 // relay pins to control relays for ALD valves
@@ -26,6 +35,12 @@
 #define RELAY6_PIN A3
 #define RELAY7_PIN A4
 #define RELAY8_PIN A5
+// Stinger CVM211GBL pressure gauge analog read
+// Analog read pin (rewired from previous relay2_pin)
+#define PGAUGE_PIN A0               // Wire to DB9 pin on CVM211GBL
+#define ADC_REF_V 5.0               // Arduino Uno default ADC reference
+#define CVM211_DIVIDER_RATIO 1.6    // (Rtop+Rbottom)/Rbottom of resistive divider; 2.0 for 3:5 divider (max voltage at pin=5V)
+
 
 #include <Adafruit_MAX31855.h>
 
@@ -96,6 +111,9 @@ void setup()
   digitalWrite(RELAY6_PIN, LOW);
   digitalWrite(RELAY7_PIN, LOW);
   digitalWrite(RELAY8_PIN, LOW);  // Active HIGH MOSFET
+
+  // pressure gauge (analog input: 1-8 V, scaled down to 5V range)
+  pinMode(PGAUGE_PIN, INPUT);  
 
   // K-type: pins 3,4,5,6
   // J-type: pins 7,8,9,10
@@ -238,6 +256,32 @@ void precursorValveActuation()
   }
 }
 
+// Pressure Gauge Functions (specifically for Stinger CVM211GBL)
+// Read raw analog and return reconstructed gauge pin voltage
+static double cvm211_readGaugeVolts() {
+  uint32_t acc = 0;
+  for (int i = 0; i < num_samples; ++i) acc += analogRead(PGAUGE_PIN);
+  double adcCounts = acc / (double)num_samples;
+  double vadc = (adcCounts * ADC_REF_V) / 1023.0;   // 10-bit ADC
+  double vgauge = vadc * CVM211_DIVIDER_RATIO;      // compensate for resistive divider
+  return vgauge;
+}
+
+// Convert gauge voltage (log-linear model, CVM211GBL) to pressure (Torr): P = 10^(V - 5)
+static double cvm211_logLinear_toTorr(double v) {
+  if (v < 1.0) v = 1.0;            // clamp to CVM211GBL range
+  if (v > 8.0) v = 8.0;
+  return pow(10.0, v - 5.0);
+}
+
+// Public helper: read pressure in Torr (log-linear only)
+void readCVM211PressureTorr() {
+  double v = cvm211_readGaugeVolts();
+  double P_Torr = cvm211_logLinear_toTorr(v);
+  Serial.println("P: " + String(P_Torr));
+}
+// END pressure gauge functions
+
 void loop()
 { 
   busy_prev = busy;
@@ -252,8 +296,8 @@ void loop()
     
     // s = "s";              // STOP command: exit loop 
     // s = "r";              // RESET command: reset pulse counter 
-    // s = "t;100;200;150;90";  // example temp. command
-    // s = "v;2;5;1000;3000";   // example valve command
+    // s = "t100;200;150;90";  // example temp. command
+    // s = "v2;5;1000;3000";   // example valve command
 
     Serial.println(s);
     int result = 0;
@@ -328,4 +372,7 @@ void loop()
   // heating control loop
   readThermocouples();
   actuateHeatingElements();
+
+  // read pressure gauge and send to python
+  readCVM211PressureTorr();
 }
